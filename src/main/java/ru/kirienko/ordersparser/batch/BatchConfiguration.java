@@ -1,6 +1,10 @@
 package ru.kirienko.ordersparser.batch;
 
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfoList;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -14,8 +18,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.kirienko.ordersparser.integration.JsonOrderItemReader;
+import ru.kirienko.ordersparser.integration.FileType;
 import ru.kirienko.ordersparser.integration.OrderItemReader;
+import ru.kirienko.ordersparser.service.OrderItemReaderService;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Configuration
 @EnableBatchProcessing
@@ -23,19 +31,19 @@ public class BatchConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final ObjectProvider<OrderItemReader> orderItemReaderProvider;
+    private final OrderItemReaderService orderItemReaderService;
 
     @Autowired
     public BatchConfiguration(JobBuilderFactory jobBuilderFactory,
                               StepBuilderFactory stepBuilderFactory,
-                              ObjectProvider<OrderItemReader> orderItemReaderProvider) {
+                              OrderItemReaderService orderItemReaderService) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-        this.orderItemReaderProvider = orderItemReaderProvider;
+        this.orderItemReaderService = orderItemReaderService;
     }
 
     @Bean
-    public Job job() {
+    public Job job() throws Exception {
         Step step = stepBuilderFactory.get("File-load")
                 .<String, String>chunk(100)
                 .reader(itemReader(null))
@@ -49,7 +57,9 @@ public class BatchConfiguration {
 
     @Bean
     @StepScope
-    ItemStreamReader<String> itemReader(@Value("#{jobParameters[file_path]}") String filePath) {
-        return orderItemReaderProvider.getObject(JsonOrderItemReader.class).getItemReader(filePath);
+    ItemStreamReader<String> itemReader(@Value("#{jobParameters[file_path]}") String filePath) throws Exception {
+        return  orderItemReaderService
+                .getOrderItemReaderByFileType(FilenameUtils.getExtension(filePath))
+                .getItemReader(filePath);
     }
 }
