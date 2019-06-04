@@ -1,5 +1,6 @@
 package ru.kirienko.ordersparser.mapper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVParser;
 import org.modelmapper.Conditions;
@@ -16,9 +17,7 @@ import ru.kirienko.ordersparser.service.OrderService;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Configuration
 public class ModelMapperProducer {
@@ -76,14 +75,54 @@ public class ModelMapperProducer {
                         else
                             context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
 
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return context.getDestination();
+                });
+
+        modelMapper.typeMap(OrderLine.class, Order.class, "json")
+                .addMappings(mp -> mp.skip(Order::setLine))
+                .setPostConverter(context -> {
+                    try {
+                        final List<OrderValidation> orderValidations = new ArrayList<>();
+                        final HashMap<String, String> values = objectMapper.readValue(context.getSource().getLine(), new TypeReference<HashMap<String, String>>(){});
+
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("id",  values.get("orderId")))
+                                        .filter(v -> !v.getDescription().equals("OK")),
+                                orderValidations::add,
+                                () -> context.getDestination().setId(Long.parseLong( values.get("orderId"))));
+
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("amount", values.get("amount")))
+                                        .filter(v -> !v.getDescription().equals("OK")),
+                                orderValidations::add,
+                                () -> context.getDestination().setAmount(new BigDecimal( values.get("amount"))));
+
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("currency", values.get("currency")))
+                                        .filter(v -> !v.getDescription().equals("OK")),
+                                orderValidations::add,
+                                () -> context.getDestination().setCurrency(values.get("currency")));
+
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("comment", values.get("comment")))
+                                        .filter(v -> !v.getDescription().equals("OK")),
+                                orderValidations::add,
+                                () -> context.getDestination().setComment(values.get("comment")));
+
+                        context.getDestination().setLine(context.getSource().getLineNumber().longValue());
+                        context.getDestination().setFileName(context.getSource().getFileName());
 
 
+                        if(orderValidations.isEmpty())
+                            context.getDestination().setResult("OK");
+                        else
+                            context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     return context.getDestination();
                 });
+
         return modelMapper;
     }
 }
