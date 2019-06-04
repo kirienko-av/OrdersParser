@@ -1,10 +1,8 @@
 package ru.kirienko.ordersparser.batch;
 
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfoList;
 import org.apache.commons.io.FilenameUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -13,17 +11,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemStreamReader;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.kirienko.ordersparser.integration.FileType;
-import ru.kirienko.ordersparser.integration.OrderItemReader;
-import ru.kirienko.ordersparser.service.OrderItemReaderService;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import ru.kirienko.ordersparser.service.OrderService;
 
 @Configuration
 @EnableBatchProcessing
@@ -31,15 +23,16 @@ public class BatchConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final OrderItemReaderService orderItemReaderService;
+    private final OrderService orderService;
 
     @Autowired
     public BatchConfiguration(JobBuilderFactory jobBuilderFactory,
                               StepBuilderFactory stepBuilderFactory,
-                              OrderItemReaderService orderItemReaderService) {
+                              OrderService orderService,
+                              ModelMapper modelMapper) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
-        this.orderItemReaderService = orderItemReaderService;
+        this.orderService = orderService;
     }
 
     @Bean
@@ -58,7 +51,7 @@ public class BatchConfiguration {
     @Bean
     @StepScope
     ItemStreamReader<String> itemReader(@Value("#{jobParameters[file_path]}") String filePath) throws Exception {
-        return  orderItemReaderService
+        return  orderService
                 .getOrderItemReaderByFileType(FilenameUtils.getExtension(filePath))
                 .getItemReader(filePath);
     }

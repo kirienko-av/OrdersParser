@@ -1,4 +1,4 @@
-package ru.kirienko.ordersparser.integration;
+package ru.kirienko.ordersparser.configuration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

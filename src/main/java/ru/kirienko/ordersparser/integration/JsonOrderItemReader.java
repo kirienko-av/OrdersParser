@@ -3,8 +3,11 @@ package ru.kirienko.ordersparser.integration;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.stereotype.Component;
+import ru.kirienko.ordersparser.configuration.FileType;
 
 @FileType("json")
+@Component
 public class JsonOrderItemReader implements OrderItemReader {
     @Override
     public ItemStreamReader<String> getItemReader(String filePath) {

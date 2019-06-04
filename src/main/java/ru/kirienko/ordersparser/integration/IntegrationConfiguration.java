@@ -18,7 +18,6 @@ import org.springframework.messaging.MessageChannel;
 import java.io.File;
 
 @Configuration
-@ComponentScan("ru.kirienko.ordersparser")
 @EnableIntegration
 @IntegrationComponentScan
 public class IntegrationConfiguration {
