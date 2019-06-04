@@ -41,7 +41,7 @@ public class BatchConfiguration {
         Step step = stepBuilderFactory.get("File-load")
                 .<Order, String>chunk(100)
                 .reader(itemReader(null))
-                .writer(i -> i.forEach(System.out::println))
+                .writer(i -> {})
                 .build();
         return jobBuilderFactory.get("Load")
                 .incrementer(new RunIdIncrementer())

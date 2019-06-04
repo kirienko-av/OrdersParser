@@ -47,13 +47,18 @@ public class Order {
     private Map<String, String> getErrorResults(){
         final ObjectMapper objectMapper = new ObjectMapper();
         Set<OrderValidation> validations = new HashSet<>();
-        if (!result.equals("OK")) {
-            try {
-                validations = objectMapper.readValue(result, new TypeReference<Set<OrderValidation>>() {});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
+        Optional.ofNullable(result)
+                .filter(r -> !r.equals("OK"))
+                .filter(r -> !r.contains("FORMAT ERROR"))
+                .ifPresent(r -> {
+                    try {
+                        validations.addAll(objectMapper.readValue(r, new TypeReference<Set<OrderValidation>>() {
+                        }));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
 
         return validations.stream()
                 .collect(Collectors.toMap(OrderValidation::getField, OrderValidation::getValue));
