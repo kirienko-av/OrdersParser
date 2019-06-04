@@ -11,6 +11,7 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
 import java.io.File;
@@ -41,7 +42,7 @@ public class IntegrationConfiguration {
                 .transform(String.class, this::fileReader)
                 .transform(fileMessageToJobRequest())
                 .handle(jobLaunchingMessageHandler())
-                .handle(jobExecution -> System.out.println(jobExecution.getPayload()))
+                .handle(Message::getPayload)
                 .get();
     }
 
