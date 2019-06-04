@@ -11,7 +11,7 @@ import ru.kirienko.ordersparser.domain.OrderLine;
 
 @FileType("json")
 @Component
-public class JsonOrderItemReader implements OrderItemReader {
+public class JsonOrderItemReader extends OrderItemReader {
     private final ModelMapper modelMapper;
 
     @Autowired

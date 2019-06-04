@@ -11,7 +11,7 @@ import ru.kirienko.ordersparser.domain.OrderLine;
 
 @FileType("csv")
 @Component
-public class CsvOrderItemReader implements OrderItemReader{
+public class CsvOrderItemReader extends OrderItemReader{
 
     private final ModelMapper modelMapper;
 
