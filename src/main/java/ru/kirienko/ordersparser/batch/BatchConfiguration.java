@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.kirienko.ordersparser.domain.Order;
 import ru.kirienko.ordersparser.service.OrderService;
 
 @Configuration
@@ -38,7 +39,7 @@ public class BatchConfiguration {
     @Bean
     public Job job() throws Exception {
         Step step = stepBuilderFactory.get("File-load")
-                .<String, String>chunk(100)
+                .<Order, String>chunk(100)
                 .reader(itemReader(null))
                 .writer(i -> i.forEach(System.out::println))
                 .build();
@@ -50,7 +51,7 @@ public class BatchConfiguration {
 
     @Bean
     @StepScope
-    ItemStreamReader<String> itemReader(@Value("#{jobParameters[file_path]}") String filePath) throws Exception {
+    ItemStreamReader<Order> itemReader(@Value("#{jobParameters[file_path]}") String filePath) throws Exception {
         return  orderService
                 .getOrderItemReaderByFileType(FilenameUtils.getExtension(filePath))
                 .getItemReader(filePath);

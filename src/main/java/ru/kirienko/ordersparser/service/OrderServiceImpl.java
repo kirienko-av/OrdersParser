@@ -41,19 +41,19 @@ public class OrderServiceImpl implements OrderService {
             switch (fieldName) {
                 case "id":
                     if(!value.matches("^\\d+$"))
-                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске \"^\\d+$\"");
+                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\d+$");
                     break;
                 case "amount":
                     if(!value.matches("^\\d+\\.?\\d+$"))
-                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске \"^\\d+\\.?\\d+$\"");
+                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\d+\\.?\\d+$");
                     break;
                 case "currency":
                     if(!value.matches("^[A-Z]+$"))
-                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске \"^[A-Z]+$\"");
+                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^[A-Z]+$");
                     break;
                 case "comment":
                     if(!value.matches("^\\S+(.*\\S+)*$"))
-                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске \"^\\S+(.*\\S+)*$\"");
+                        orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\S+(.*\\S+)*$");
                     break;
                 default:
                     orderValidation.setDescription("Не удалось расспознать назначение данных");
