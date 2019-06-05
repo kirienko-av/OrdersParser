@@ -2,7 +2,6 @@ package ru.kirienko.ordersparser.mapper;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.DataFormatException;
 
 @Configuration
 public class ModelMapperProducer {
@@ -49,9 +49,12 @@ public class ModelMapperProducer {
         modelMapper.typeMap(OrderLine.class, Order.class, "csv")
                 .addMappings(mp -> mp.skip(Order::setLine))
                 .setPostConverter(context -> {
+                    final List<OrderValidation> orderValidations = new ArrayList<>();
                     try {
-                        final List<OrderValidation> orderValidations = new ArrayList<>();
                         final String[] values = csvParser.parseLine(context.getSource().getLine());
+
+                        if(values.length != 4)
+                            throw new DataFormatException();
 
                         Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("id", values[0]))
                                 .filter(v -> !v.getDescription().equals("OK")),
@@ -63,27 +66,34 @@ public class ModelMapperProducer {
                                 orderValidations::add,
                                 () -> context.getDestination().setAmount(new BigDecimal(values[1])));
 
-                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("currency", values[2]))
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("currency", values[2].trim()))
                                         .filter(v -> !v.getDescription().equals("OK")),
                                 orderValidations::add,
-                                () -> context.getDestination().setCurrency(values[2]));
+                                () -> context.getDestination().setCurrency(values[2].trim()));
 
-                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("comment", values[3]))
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("comment", values[3].trim()))
                                         .filter(v -> !v.getDescription().equals("OK")),
                                 orderValidations::add,
-                                () -> context.getDestination().setComment(values[3]));
+                                () -> context.getDestination().setComment(values[3].trim()));
 
                         context.getDestination().setLine(context.getSource().getLineNumber().longValue());
                         context.getDestination().setFileName(context.getSource().getFileName());
-
-
+                    } catch (IOException | DataFormatException e) {
+                        OrderValidation orderValidation = new OrderValidation("orderData", context.getSource().getLine());
+                        orderValidation.setDescription("Данные не соответствует формату csv");
+                        orderValidations.add(orderValidation);
+                    } finally {
+                        context.getDestination().setLine(context.getSource().getLineNumber().longValue());
+                        context.getDestination().setFileName(context.getSource().getFileName());
                         if(orderValidations.isEmpty())
                             context.getDestination().setResult("OK");
-                        else
-                            context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        else {
+                            try {
+                                context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     return context.getDestination();
                 });
@@ -91,8 +101,8 @@ public class ModelMapperProducer {
         modelMapper.typeMap(OrderLine.class, Order.class, "json")
                 .addMappings(mp -> mp.skip(Order::setLine))
                 .setPostConverter(context -> {
+                    final List<OrderValidation> orderValidations = new ArrayList<>();
                     try {
-                        final List<OrderValidation> orderValidations = new ArrayList<>();
                         final HashMap<String, String> values = objectMapper.readValue(context.getSource().getLine(), new TypeReference<HashMap<String, String>>() {
                         });
 
@@ -106,36 +116,37 @@ public class ModelMapperProducer {
                                 orderValidations::add,
                                 () -> context.getDestination().setAmount(new BigDecimal(values.get("amount"))));
 
-                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("currency", values.get("currency")))
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("currency", values.get("currency").trim()))
                                         .filter(v -> !v.getDescription().equals("OK")),
                                 orderValidations::add,
-                                () -> context.getDestination().setCurrency(values.get("currency")));
+                                () -> context.getDestination().setCurrency(values.get("currency").trim()));
 
-                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("comment", values.get("comment")))
+                        Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("comment", values.get("comment").trim()))
                                         .filter(v -> !v.getDescription().equals("OK")),
                                 orderValidations::add,
-                                () -> context.getDestination().setComment(values.get("comment")));
+                                () -> context.getDestination().setComment(values.get("comment").trim()));
 
-                        context.getDestination().setLine(context.getSource().getLineNumber().longValue());
-                        context.getDestination().setFileName(context.getSource().getFileName());
-
-
-                        if (orderValidations.isEmpty())
-                            context.getDestination().setResult("OK");
-                        else
-                            context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
-
-                    } catch (JsonEOFException | JsonMappingException e) {
-                        context.getDestination().setLine(context.getSource().getLineNumber().longValue());
-                        context.getDestination().setResult("FORMAT ERROR: Формат строки " + context.getSource().getLineNumber() + " " +
-                                context.getSource().getLine() + " не сответствует формату json");
+                    } catch (JsonMappingException |JsonParseException e) {
+                        OrderValidation orderValidation = new OrderValidation("orderData", context.getSource().getLine());
+                        orderValidation.setDescription("Данные не соответствует формату json");
+                        orderValidations.add(orderValidation);
                     } catch (IOException e) {
                         e.printStackTrace();
-
+                    }
+                    finally {
+                        context.getDestination().setLine(context.getSource().getLineNumber().longValue());
+                        context.getDestination().setFileName(context.getSource().getFileName());
+                        if (orderValidations.isEmpty())
+                            context.getDestination().setResult("OK");
+                        else {
+                            try {
+                                context.getDestination().setResult(objectMapper.writeValueAsString(orderValidations));
+                            } catch (JsonProcessingException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     return context.getDestination();
-
-
                 });
 
         return modelMapper;

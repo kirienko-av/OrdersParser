@@ -1,6 +1,7 @@
 package ru.kirienko.ordersparser.domain;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 
@@ -28,17 +29,17 @@ public class Order {
 
         return String.format(pattern, Optional.ofNullable(id)
                 .map(Object::toString)
-                .orElse(validations.get("id")),
+                .orElse("\"" + validations.get("id") + "\""),
                 Optional.ofNullable(amount)
                         .map(Object::toString)
-                        .orElse(validations.get("amount")),
+                        .orElse("\"" + validations.get("amount") + "\""),
                 Optional.ofNullable(comment)
                         .orElse(validations.get("comment")),
                 Optional.ofNullable(fileName)
                         .orElse(validations.get("filename")),
                 Optional.ofNullable(line)
                         .map(Object::toString)
-                        .orElse(validations.get("line")),
+                        .orElse("\"" + validations.get("line") + "\""),
                 Optional.ofNullable(result)
                         .orElse(validations.get("result"))
         );
@@ -46,11 +47,19 @@ public class Order {
 
     private Map<String, String> getErrorResults(){
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+        objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         Set<OrderValidation> validations = new HashSet<>();
 
         Optional.ofNullable(result)
-                .filter(r -> !r.equals("OK"))
-                .filter(r -> !r.contains("FORMAT ERROR"))
+                .filter(r -> {
+                    try {
+                        objectMapper.readTree(r);
+                    } catch (IOException e) {
+                        return false;
+                    }
+                    return true;
+                })
                 .ifPresent(r -> {
                     try {
                         validations.addAll(objectMapper.readValue(r, new TypeReference<Set<OrderValidation>>() {
@@ -61,7 +70,7 @@ public class Order {
                 });
 
         return validations.stream()
-                .collect(Collectors.toMap(OrderValidation::getField, OrderValidation::getValue));
+                .collect(Collectors.toMap(OrderValidation::getKey, OrderValidation::getValue));
 
     }
 }

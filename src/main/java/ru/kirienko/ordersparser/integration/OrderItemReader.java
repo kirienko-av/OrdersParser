@@ -21,7 +21,6 @@ public abstract class OrderItemReader {
         reader.setLineMapper((line, lineNumber) -> {
             Order order = lineMapper(new OrderLine(line, lineNumber, FilenameUtils.getName(filePath)));
             orderParserGateway.print(order);
-            System.out.println(order);
             return order;
         });
         return reader;
