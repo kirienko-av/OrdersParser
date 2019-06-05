@@ -37,6 +37,7 @@ public class IntegrationConfiguration {
     public MessageChannel filesChannel() {
         return new DirectChannel();
     }
+
     @Bean
     public MessageChannel printChannel() {
         return new DirectChannel();

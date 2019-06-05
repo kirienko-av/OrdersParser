@@ -10,9 +10,9 @@ import java.util.Arrays;
 @ComponentScan
 public class OrdersParserApplication {
 
-	public static void main(String[] args) {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(OrdersParserApplication.class);
-		OrderParserGateway orderGateway = ctx.getBean(OrderParserGateway.class);
-		orderGateway.parse(Arrays.asList(args));
-	}
+    public static void main(String[] args) {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(OrdersParserApplication.class);
+        OrderParserGateway orderGateway = ctx.getBean(OrderParserGateway.class);
+        orderGateway.parse(Arrays.asList(args));
+    }
 }

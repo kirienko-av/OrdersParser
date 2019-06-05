@@ -53,11 +53,11 @@ public class ModelMapperProducer {
                     try {
                         final String[] values = csvParser.parseLine(context.getSource().getLine());
 
-                        if(values.length != 4)
+                        if (values.length != 4)
                             throw new DataFormatException();
 
                         Optionals.ifPresentOrElse(Optional.ofNullable(orderService.validation("id", values[0]))
-                                .filter(v -> !v.getDescription().equals("OK")),
+                                        .filter(v -> !v.getDescription().equals("OK")),
                                 orderValidations::add,
                                 () -> context.getDestination().setId(Long.parseLong(values[0])));
 
@@ -85,7 +85,7 @@ public class ModelMapperProducer {
                     } finally {
                         context.getDestination().setLine(context.getSource().getLineNumber().longValue());
                         context.getDestination().setFileName(context.getSource().getFileName());
-                        if(orderValidations.isEmpty())
+                        if (orderValidations.isEmpty())
                             context.getDestination().setResult("OK");
                         else {
                             try {
@@ -126,14 +126,13 @@ public class ModelMapperProducer {
                                 orderValidations::add,
                                 () -> context.getDestination().setComment(values.get("comment").trim()));
 
-                    } catch (JsonMappingException |JsonParseException e) {
+                    } catch (JsonMappingException | JsonParseException e) {
                         OrderValidation orderValidation = new OrderValidation("orderData", context.getSource().getLine());
                         orderValidation.setDescription("Данные не соответствует формату json");
                         orderValidations.add(orderValidation);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    finally {
+                    } finally {
                         context.getDestination().setLine(context.getSource().getLineNumber().longValue());
                         context.getDestination().setFileName(context.getSource().getFileName());
                         if (orderValidations.isEmpty())

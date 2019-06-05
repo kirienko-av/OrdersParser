@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.kirienko.ordersparser.configuration.FileType;
 import ru.kirienko.ordersparser.domain.OrderValidation;
-import ru.kirienko.ordersparser.integration.OrderItemReader;
+import ru.kirienko.ordersparser.reader.OrderItemReader;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -33,26 +33,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderValidation validation(String fieldName, String value){
+    public OrderValidation validation(String fieldName, String value) {
         final OrderValidation orderValidation = new OrderValidation(fieldName, value);
-        if(value == null){
+        if (value == null) {
             orderValidation.setDescription("Поле " + fieldName + " обязательное для заполнения");
         } else {
             switch (fieldName) {
                 case "id":
-                    if(!value.matches("^\\d+$"))
+                    if (!value.matches("^\\d+$"))
                         orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\d+$");
                     break;
                 case "amount":
-                    if(!value.matches("^\\d+\\.?\\d+$"))
+                    if (!value.matches("^\\d+\\.?\\d+$"))
                         orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\d+\\.?\\d+$");
                     break;
                 case "currency":
-                    if(!value.matches("^[A-Z]+$"))
+                    if (!value.matches("^[A-Z]+$"))
                         orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^[A-Z]+$");
                     break;
                 case "comment":
-                    if(!value.matches("^\\S+(.*\\S+)*$"))
+                    if (!value.matches("^\\S+(.*\\S+)*$"))
                         orderValidation.setDescription("Поле " + fieldName + " не соответствует маске ^\\S+(.*\\S+)*$");
                     break;
                 default:

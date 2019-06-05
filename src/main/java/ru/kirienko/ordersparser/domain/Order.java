@@ -28,8 +28,8 @@ public class Order {
         Map<String, String> validations = getErrorResults();
 
         return String.format(pattern, Optional.ofNullable(id)
-                .map(Object::toString)
-                .orElse("\"" + validations.get("id") + "\""),
+                        .map(Object::toString)
+                        .orElse("\"" + validations.get("id") + "\""),
                 Optional.ofNullable(amount)
                         .map(Object::toString)
                         .orElse("\"" + validations.get("amount") + "\""),
@@ -45,7 +45,7 @@ public class Order {
         );
     }
 
-    private Map<String, String> getErrorResults(){
+    private Map<String, String> getErrorResults() {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
         objectMapper.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);

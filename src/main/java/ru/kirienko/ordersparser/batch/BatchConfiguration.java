@@ -41,7 +41,8 @@ public class BatchConfiguration {
         Step step = stepBuilderFactory.get("File-load")
                 .<Order, String>chunk(100)
                 .reader(itemReader(null))
-                .writer(i -> {})
+                .writer(i -> {
+                })
                 .build();
         return jobBuilderFactory.get("Load")
                 .incrementer(new RunIdIncrementer())
@@ -52,7 +53,7 @@ public class BatchConfiguration {
     @Bean
     @StepScope
     ItemStreamReader<Order> itemReader(@Value("#{jobParameters[file_path]}") String filePath) throws Exception {
-        return  orderService
+        return orderService
                 .getOrderItemReaderByFileType(FilenameUtils.getExtension(filePath))
                 .getItemReader(filePath);
     }
