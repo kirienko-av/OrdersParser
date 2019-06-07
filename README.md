@@ -14,9 +14,9 @@
 где `orders1.csv` и `orders2.json` файлы для парсинга.
 
 ### Добавление поддержки нового формата входящих данных <a name="new"></a>
-Что бы добавить поддержку нового формата данных необходимо создать класс расширенный абстрактным классом `ru.kirienko.ordersparser.reader.OrderItemReader` который должен быть аннотированным с помощью `import org.springframework.stereotype.Component` и `import ru.kirienko.ordersparser.configuration.FileType` с установленным значением `value` указывающим на расширение нового формата, а так же переопределить методы `FlatFileItemReader<Order> itemReader(String filePath)` и Order `lineMapper(OrderLine orderLine)`.
+Что бы добавить поддержку нового формата данных необходимо создать класс расширенный абстрактным классом `ru.kirienko.ordersparser.reader.OrderItemReader` который должен быть аннотированным с помощью `import org.springframework.stereotype.Component` и `import ru.kirienko.ordersparser.configuration.FileType` с установленным значением `value` указывающим на расширение нового формата, а так же переопределить методы `FlatFileItemReader<Order> itemReader(String filePath)` и `Order lineMapper(OrderLine orderLine)`.
 
-## Пример <a name="example"></a>
+#### Пример <a name="example"></a>
 ```
 @FileType("xls")
 @Component
