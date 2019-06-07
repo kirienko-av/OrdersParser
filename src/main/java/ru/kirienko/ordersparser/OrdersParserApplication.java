@@ -1,18 +1,12 @@
 package ru.kirienko.ordersparser;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import ru.kirienko.ordersparser.integration.OrderParserGateway;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Arrays;
-
-@ComponentScan
+@SpringBootApplication
 public class OrdersParserApplication {
 
     public static void main(String[] args) {
-        ApplicationContext ctx = new AnnotationConfigApplicationContext(OrdersParserApplication.class);
-        OrderParserGateway orderGateway = ctx.getBean(OrderParserGateway.class);
-        orderGateway.parse(Arrays.asList(args));
+        SpringApplication.run(OrdersParserApplication.class, args);
     }
 }
