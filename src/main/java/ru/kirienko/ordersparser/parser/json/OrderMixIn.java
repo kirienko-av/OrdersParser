@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class OrderMixIn {
     @JsonProperty("orderId")
-    String id;
+    private String id;
     @JsonProperty("amount")
-    String amount;
+    private String amount;
     @JsonProperty("currency")
-    String currency;
+    private String currency;
     @JsonProperty("comment")
-    String comment;
+    private String comment;
 }

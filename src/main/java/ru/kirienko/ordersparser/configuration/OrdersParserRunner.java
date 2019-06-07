@@ -16,6 +16,7 @@ public class OrdersParserRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         args.getNonOptionArgs().stream()
                 .flatMap(parserService::getOrderStream)
+                .parallel()
                 .forEach(System.out::println);
     }
 }

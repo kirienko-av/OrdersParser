@@ -1,6 +1,8 @@
-package ru.kirienko.ordersparser.parser.json;
+package ru.kirienko.ordersparser.parser.csv;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.kirienko.ordersparser.annotation.FileType;
@@ -14,11 +16,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 @Component
-@FileType("json")
-public class JsonOrderParser implements OrderParser {
+@FileType("csv")
+public class CsvOrderParser implements OrderParser {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private CsvMapper csvMapper;
 
     @Override
     public Stream<OrderDTO> getOrderStream(Path filePath) {
@@ -33,18 +35,26 @@ public class JsonOrderParser implements OrderParser {
         return stream;
     }
 
-    private OrderDTO mapToOrderDTO(String json, Long lineNumber, String fileName) {
+    private OrderDTO mapToOrderDTO(String csv, Long lineNumber, String fileName) {
         OrderDTO orderDTO = new OrderDTO();
+
+        CsvSchema schema = CsvSchema.builder()
+                .addColumn("id")
+                .addColumn("amount")
+                .addColumn("currency")
+                .addColumn("comment")
+                .build();
         try {
-            orderDTO = objectMapper
-                    .addMixIn(OrderDTO.class, OrderMixIn.class)
-                    .readValue(json, OrderDTO.class);
+            MappingIterator<OrderDTO> it = csvMapper.readerFor(OrderDTO.class).with(schema)
+                    .readValues(csv);
+            if (it.hasNextValue())
+                orderDTO = it.nextValue();
+
         } catch (IOException e) {
-            orderDTO.setResult("Invalid line");
-        } finally {
-            orderDTO.setFileName(fileName);
-            orderDTO.setLine(lineNumber);
+            e.printStackTrace();
         }
+        orderDTO.setFileName(fileName);
+        orderDTO.setLine(lineNumber);
         return orderDTO;
     }
 }
