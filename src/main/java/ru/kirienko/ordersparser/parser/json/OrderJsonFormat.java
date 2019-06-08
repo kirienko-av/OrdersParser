@@ -2,7 +2,7 @@ package ru.kirienko.ordersparser.parser.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public abstract class OrderMixIn {
+public abstract class OrderJsonFormat {
     @JsonProperty("orderId")
     private String id;
     @JsonProperty("amount")

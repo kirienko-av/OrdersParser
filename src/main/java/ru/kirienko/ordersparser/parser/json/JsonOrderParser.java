@@ -22,7 +22,7 @@ public class JsonOrderParser implements OrderParser {
 
     @Override
     public Stream<OrderDTO> getOrderStream(Path filePath) {
-        AtomicLong i = new AtomicLong(0);
+        AtomicLong i = new AtomicLong(1);
         Stream<OrderDTO> stream = Stream.empty();
         try {
             stream = Files.lines(filePath)
@@ -37,7 +37,7 @@ public class JsonOrderParser implements OrderParser {
         OrderDTO orderDTO = new OrderDTO();
         try {
             orderDTO = objectMapper
-                    .addMixIn(OrderDTO.class, OrderMixIn.class)
+                    .addMixIn(OrderDTO.class, OrderJsonFormat.class)
                     .readValue(json, OrderDTO.class);
         } catch (IOException e) {
             orderDTO.setResult("Invalid line");
