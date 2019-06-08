@@ -24,26 +24,29 @@ public class JsonOrderParser implements OrderParser {
     public Stream<OrderDTO> getOrderStream(Path filePath) {
         AtomicLong i = new AtomicLong(1);
         Stream<OrderDTO> stream = Stream.empty();
+
+
         try {
             stream = Files.lines(filePath)
-                    .map(l -> mapToOrderDTO(l, i.getAndIncrement(), filePath.getFileName().toString()));
+                    .map(this::mapToOrderDTO)
+                    .peek(o -> {
+                        o.setFileName(filePath.getFileName().toString());
+                        o.setLine(i.getAndIncrement());
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
         return stream;
     }
 
-    private OrderDTO mapToOrderDTO(String json, Long lineNumber, String fileName) {
+    private OrderDTO mapToOrderDTO(String json) {
         OrderDTO orderDTO = new OrderDTO();
         try {
             orderDTO = objectMapper
                     .addMixIn(OrderDTO.class, OrderJsonFormat.class)
                     .readValue(json, OrderDTO.class);
         } catch (IOException e) {
-            orderDTO.setResult("Invalid line");
-        } finally {
-            orderDTO.setFileName(fileName);
-            orderDTO.setLine(lineNumber);
+            orderDTO.setResult("Invalid json");
         }
         return orderDTO;
     }
