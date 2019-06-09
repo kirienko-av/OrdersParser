@@ -26,6 +26,7 @@ public class ParserServiceImpl implements ParserService {
 
     @Override
     public Stream<Order> lines(String filePath) {
+        final Stream<Order> stream;
         ClassInfoList classInfos = new ClassGraph().enableAllInfo().scan()
                 .getClassesWithAnnotation(FileType.class.getName())
                 .filter(classInfo -> classInfo.implementsInterface(OrderParser.class.getName()))
@@ -34,12 +35,17 @@ public class ParserServiceImpl implements ParserService {
                         .equals(FilenameUtils.getExtension(filePath))
                 );
 
-        if (classInfos.size() != 1)
-            System.out.println("No reader class found for extension " + FilenameUtils.getExtension(filePath));
+        if (classInfos.size() == 1) { 
+            OrderParser orderParser = context.getBean(classInfos.get(0)
+                    .loadClass(OrderParser.class));
 
-        OrderParser orderParser = context.getBean(classInfos.get(0)
-                .loadClass(OrderParser.class));
-        return orderParser.lines(Paths.get(filePath));
+            stream = orderParser.lines(Paths.get(filePath));
+        } else{
+            stream = Stream.empty();
+            System.out.println("Reading class not found for extension " + FilenameUtils.getExtension(filePath));
+        }
+
+        return stream;
     }
 
     @Override
