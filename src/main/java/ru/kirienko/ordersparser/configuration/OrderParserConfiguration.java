@@ -1,5 +1,6 @@
 package ru.kirienko.ordersparser.configuration;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
@@ -18,6 +19,7 @@ public class OrderParserConfiguration {
     public CsvMapper csvMapper() {
         CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
+        csvMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         return csvMapper;
     }
 }

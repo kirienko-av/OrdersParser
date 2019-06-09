@@ -3,7 +3,7 @@ package ru.kirienko.ordersparser.parser.csv;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class OrderCsvFormat {
-    @JsonProperty("Идентификатор ордера")
+    @JsonProperty("идентификатор ордера")
     private String id;
     @JsonProperty("сумма")
     private String amount;
