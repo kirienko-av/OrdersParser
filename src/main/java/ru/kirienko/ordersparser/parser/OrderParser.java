@@ -1,10 +1,10 @@
 package ru.kirienko.ordersparser.parser;
 
-import ru.kirienko.ordersparser.dto.OrderDTO;
+import ru.kirienko.ordersparser.domain.Order;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public interface OrderParser {
-    Stream<OrderDTO> getOrderStream(Path filePath);
+    Stream<Order> lines(Path filePath);
 }

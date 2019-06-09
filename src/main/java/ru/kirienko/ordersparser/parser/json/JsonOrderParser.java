@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.kirienko.ordersparser.annotation.FileType;
-import ru.kirienko.ordersparser.dto.OrderDTO;
+import ru.kirienko.ordersparser.domain.Order;
 import ru.kirienko.ordersparser.parser.OrderParser;
 
 import java.io.IOException;
@@ -21,10 +21,9 @@ public class JsonOrderParser implements OrderParser {
     private ObjectMapper objectMapper;
 
     @Override
-    public Stream<OrderDTO> getOrderStream(Path filePath) {
+    public Stream<Order> lines(Path filePath) {
         AtomicLong i = new AtomicLong(1);
-        Stream<OrderDTO> stream = Stream.empty();
-
+        Stream<Order> stream = Stream.empty();
 
         try {
             stream = Files.lines(filePath)
@@ -39,15 +38,15 @@ public class JsonOrderParser implements OrderParser {
         return stream;
     }
 
-    private OrderDTO mapToOrderDTO(String json) {
-        OrderDTO orderDTO = new OrderDTO();
+    private Order mapToOrderDTO(String json) {
+        Order order = new Order();
         try {
-            orderDTO = objectMapper
-                    .addMixIn(OrderDTO.class, OrderJsonFormat.class)
-                    .readValue(json, OrderDTO.class);
+            order = objectMapper
+                    .addMixIn(Order.class, OrderJsonFormat.class)
+                    .readValue(json, Order.class);
         } catch (IOException e) {
-            orderDTO.setResult("Invalid json");
+            order.setResult("ERROR: Invalid json");
         }
-        return orderDTO;
+        return order;
     }
 }

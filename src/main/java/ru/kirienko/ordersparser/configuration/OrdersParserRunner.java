@@ -15,7 +15,8 @@ public class OrdersParserRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         args.getNonOptionArgs().stream()
-                .flatMap(parserService::getOrderStream)
+                .flatMap(parserService::lines)
+                .map(parserService::validate)
                 .parallel()
                 .forEach(System.out::println);
     }

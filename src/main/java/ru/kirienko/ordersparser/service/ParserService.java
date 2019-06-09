@@ -1,9 +1,11 @@
 package ru.kirienko.ordersparser.service;
 
-import ru.kirienko.ordersparser.dto.OrderDTO;
+import ru.kirienko.ordersparser.domain.Order;
 
 import java.util.stream.Stream;
 
 public interface ParserService {
-    Stream<OrderDTO> getOrderStream(String filePath);
+    Stream<Order> lines(String filePath);
+
+    Order validate(Order order);
 }

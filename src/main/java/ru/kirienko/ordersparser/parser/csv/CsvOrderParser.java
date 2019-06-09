@@ -5,7 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.kirienko.ordersparser.annotation.FileType;
-import ru.kirienko.ordersparser.dto.OrderDTO;
+import ru.kirienko.ordersparser.domain.Order;
 import ru.kirienko.ordersparser.parser.OrderParser;
 
 import java.io.IOException;
@@ -24,14 +24,14 @@ public class CsvOrderParser implements OrderParser {
     private CsvMapper csvMapper;
 
     @Override
-    public Stream<OrderDTO> getOrderStream(Path filePath) {
+    public Stream<Order> lines(Path filePath) {
         AtomicLong i = new AtomicLong(1);
-        Stream<OrderDTO> stream = Stream.empty();
+        Stream<Order> stream = Stream.empty();
 
         try {
-            MappingIterator<OrderDTO> iterator = csvMapper
-                    .addMixIn(OrderDTO.class, OrderCsvFormat.class)
-                    .readerFor(OrderDTO.class)
+            MappingIterator<Order> iterator = csvMapper
+                    .addMixIn(Order.class, OrderCsvFormat.class)
+                    .readerFor(Order.class)
                     .with(csvMapper.schemaFor(OrderCsvFormat.class)
                             .withSkipFirstDataRow(true))
                     .readValues(filePath.toFile());
