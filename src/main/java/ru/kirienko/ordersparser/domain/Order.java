@@ -11,4 +11,15 @@ public class Order {
     private String fileName;
     private Long line;
     private String result;
+
+    @Override
+    public String toString() {
+        return "{id:" + id + "," +
+                "amount:" + amount + "," +
+                "currency:\"" + currency + "\"," +
+                "comment:\"" + comment + "\"," +
+                "filename:\"" + fileName + "\"," +
+                "line:" + line + "," +
+                "result:\"" + result + "\"}";
+    }
 }
