@@ -10,26 +10,22 @@
 `mvn clean install`.
 
 ### Запуск приложения <a name="run"></a>
-Пример команды запуска: `java -jar orders-parser.jar orders1.csv orders2.json`
-где `orders1.csv` и `orders2.json` файлы для парсинга.
+Пример команды запуска: `java -jar orders-parser.jar orders.csv orders.json`
+где `orders.csv` и `orders.json` файлы для парсинга.
 
 ### Добавление поддержки нового формата входящих данных <a name="new"></a>
-Что бы добавить поддержку нового формата данных необходимо создать класс расширенный абстрактным классом `ru.kirienko.ordersparser.reader.OrderItemReader` который должен быть аннотированным с помощью `import org.springframework.stereotype.Component` и `import ru.kirienko.ordersparser.configuration.FileType` с установленным значением `value` указывающим на расширение нового формата, а так же переопределить методы `FlatFileItemReader<Order> itemReader(String filePath)` и `Order lineMapper(OrderLine orderLine)`.
+Что бы добавить поддержку нового формата данных необходимо создать 
+ аннотированный, `import org.springframework.stereotype.Component` и `ru.kirienko.ordersparser.annotation.FileType` со значением `value` указывающим на расширение нового формата, класс, а так же имплементирующий интерфейс `ru.kirienko.ordersparser.parser.OrderParser`.
 
 #### Пример <a name="example"></a>
 ```
 @FileType("xls")
 @Component
-public class XlsOrderItemReader extends OrderItemReader {
+public class XlsOrderParser implements OrderParser {
 
     @Override
-    public FlatFileItemReader<Order> itemReader(String filePath) {
+    public Stream<Order> lines(Path filePath) {
         ...
-    }
-
-    @Override
-    public Order lineMapper(OrderLine orderLine) {
-        ...
-    }
+    }    
 }
 ```
