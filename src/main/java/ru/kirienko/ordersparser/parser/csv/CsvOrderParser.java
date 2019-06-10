@@ -32,9 +32,7 @@ public class CsvOrderParser implements OrderParser {
             MappingIterator<Order> iterator = csvMapper
                     .addMixIn(Order.class, OrderCsvFormat.class)
                     .readerFor(Order.class)
-                    .with(csvMapper.typedSchemaFor(OrderCsvFormat.class)
-                            .withUseHeader(true)
-                            .withColumnReordering(true))
+                    .with(csvMapper.typedSchemaFor(OrderCsvFormat.class))
                     .readValues(filePath.toFile());
 
             stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator,

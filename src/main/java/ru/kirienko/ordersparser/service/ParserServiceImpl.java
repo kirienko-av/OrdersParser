@@ -35,12 +35,12 @@ public class ParserServiceImpl implements ParserService {
                         .equals(FilenameUtils.getExtension(filePath))
                 );
 
-        if (classInfos.size() == 1) { 
+        if (classInfos.size() == 1) {
             OrderParser orderParser = context.getBean(classInfos.get(0)
                     .loadClass(OrderParser.class));
 
             stream = orderParser.lines(Paths.get(filePath));
-        } else{
+        } else {
             stream = Stream.empty();
             System.out.println("Reading class not found for extension " + FilenameUtils.getExtension(filePath));
         }
